@@ -2,22 +2,46 @@
 
 package model
 
+type Jancok struct {
+	ID    string `json:"id"`
+	Title string `json:"title"`
+}
+
+type Link struct {
+	ID      string `json:"id"`
+	Title   string `json:"title"`
+	Address string `json:"address"`
+	User    *User  `json:"user"`
+}
+
+type Login struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
 type Mutation struct {
 }
 
-type NewTodo struct {
-	Text   string `json:"text"`
-	UserID string `json:"userId"`
+type NewJancok struct {
+	Title   string `json:"title"`
+	Address string `json:"address"`
+}
+
+type NewLink struct {
+	Title   string `json:"title"`
+	Address string `json:"address"`
+}
+
+type NewUser struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 type Query struct {
 }
 
-type Todo struct {
-	ID   string `json:"id"`
-	Text string `json:"text"`
-	Done bool   `json:"done"`
-	User *User  `json:"user"`
+type RefreshTokenInput struct {
+	Token string `json:"token"`
 }
 
 type User struct {
