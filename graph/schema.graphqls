@@ -39,7 +39,4 @@ type Mutation {
   login(input: Login!): String!
   # we'll talk about this in authentication section
   refreshToken(input: RefreshTokenInput!): String!
-
-  # create new Jancok
-  createJancok(input: NewJancok!): Jancok!
 }

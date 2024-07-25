@@ -31,11 +31,6 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, input model.Refresh
 	panic(fmt.Errorf("not implemented: RefreshToken - refreshToken"))
 }
 
-// CreateJancok is the resolver for the createJancok field.
-func (r *mutationResolver) CreateJancok(ctx context.Context, input model.NewJancok) (*model.Jancok, error) {
-	panic(fmt.Errorf("not implemented: CreateJancok - createJancok"))
-}
-
 // Links is the resolver for the links field.
 func (r *queryResolver) Links(ctx context.Context) ([]*model.Link, error) {
 	panic(fmt.Errorf("not implemented: Links - links"))

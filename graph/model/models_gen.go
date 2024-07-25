@@ -2,11 +2,6 @@
 
 package model
 
-type Jancok struct {
-	ID    string `json:"id"`
-	Title string `json:"title"`
-}
-
 type Link struct {
 	ID      string `json:"id"`
 	Title   string `json:"title"`
@@ -20,11 +15,6 @@ type Login struct {
 }
 
 type Mutation struct {
-}
-
-type NewJancok struct {
-	Title   string `json:"title"`
-	Address string `json:"address"`
 }
 
 type NewLink struct {

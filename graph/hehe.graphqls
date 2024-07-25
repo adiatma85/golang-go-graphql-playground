@@ -1,9 +1,0 @@
-type Jancok {
-    id: ID!
-    title: String!
-}
-
-input NewJancok {
-  title: String!
-  address: String!
-}
