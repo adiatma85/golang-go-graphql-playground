@@ -8,6 +8,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/adiatma85/exp-golang-graphql/graph"
+	"github.com/adiatma85/exp-golang-graphql/internal/pkg/auth"
 	"github.com/adiatma85/exp-golang-graphql/internal/pkg/db/mysql"
 	"github.com/go-chi/chi"
 )
@@ -30,6 +31,10 @@ func main() {
 
 	// Using chi router
 	router := chi.NewRouter()
+
+	// Kalau kaya gini berarti semua router kenak dong??
+	// Jawaban iya, dia kenak semuanya
+	router.Use(auth.Middleware())
 
 	mysql.InitDB()
 	defer mysql.CloseDB()
