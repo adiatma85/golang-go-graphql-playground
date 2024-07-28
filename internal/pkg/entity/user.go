@@ -15,7 +15,7 @@ type User struct {
 }
 
 func (user *User) Create() {
-	statement, err := database.Db.Prepare("INSERT INTO Users(username, password) VALUES(?,?)")
+	statement, err := database.Db.Prepare("INSERT INTO user (username, password) VALUES(?,?)")
 	print(statement)
 	if err != nil {
 		log.Fatal(err)
@@ -28,6 +28,26 @@ func (user *User) Create() {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func (user *User) Authenticate() bool {
+	statement, err := database.Db.Prepare("select password from user WHERE username = ?")
+	if err != nil {
+		log.Fatal(err)
+	}
+	row := statement.QueryRow(user.Username)
+
+	var hashedPassword string
+	err = row.Scan(&hashedPassword)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return false
+		} else {
+			log.Fatal(err)
+		}
+	}
+
+	return CheckPasswordHash(user.Password, hashedPassword)
 }
 
 // GetUserIdByUsername check if a user exists in database by given username
@@ -60,4 +80,11 @@ func HashPassword(password string) (string, error) {
 func CheckPasswordHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
+}
+
+// type of error
+type WrongUsernameOrPasswordError struct{}
+
+func (m *WrongUsernameOrPasswordError) Error() string {
+	return "wrong username or password"
 }
