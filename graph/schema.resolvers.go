@@ -10,6 +10,7 @@ import (
 	"strconv"
 
 	"github.com/adiatma85/exp-golang-graphql/graph/model"
+	"github.com/adiatma85/exp-golang-graphql/internal/pkg/auth"
 	"github.com/adiatma85/exp-golang-graphql/internal/pkg/entity"
 	"github.com/adiatma85/exp-golang-graphql/internal/pkg/jwt"
 )
@@ -21,16 +22,26 @@ func (r *mutationResolver) CreateLink(ctx context.Context, input model.NewLink) 
 	var link entity.Link
 	link.Title = input.Title
 	link.Address = input.Address
+	user := auth.ForContext(ctx)
+	if user == nil {
+		return &model.Link{}, fmt.Errorf("access denied")
+	}
 
-	fmt.Println("Input adalah: ", input)
-
+	link.User = user
 	linkID := link.Save()
-	return &model.Link{ID: strconv.FormatInt(linkID, 10), Title: link.Title, Address: link.Address}, nil
+	graphqlUser := &model.User{
+		ID:   user.ID,
+		Name: user.Username,
+	}
+
+	return &model.Link{ID: strconv.FormatInt(linkID, 10), Title: link.Title, Address: link.Address, User: graphqlUser}, nil
 }
 
 // CreateUser is the resolver for the createUser field.
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) (string, error) {
-	var user entity.User
+	var (
+		user entity.User
+	)
 	user.Username = input.Username
 	user.Password = input.Password
 	user.Create()
@@ -43,7 +54,9 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) 
 
 // Login is the resolver for the login field.
 func (r *mutationResolver) Login(ctx context.Context, input model.Login) (string, error) {
-	var user entity.User
+	var (
+		user entity.User
+	)
 	user.Username = input.Username
 	user.Password = input.Password
 	correct := user.Authenticate()
@@ -79,7 +92,11 @@ func (r *queryResolver) Links(ctx context.Context) ([]*model.Link, error) {
 
 	dbLinks := entity.GetAll()
 	for _, link := range dbLinks {
-		resultLinks = append(resultLinks, &model.Link{ID: link.ID, Title: link.Title, Address: link.Address})
+		graphqlUser := &model.User{
+			ID:   link.User.ID,
+			Name: link.User.Username,
+		}
+		resultLinks = append(resultLinks, &model.Link{ID: link.ID, Title: link.Title, Address: link.Address, User: graphqlUser})
 	}
 	return resultLinks, nil
 }

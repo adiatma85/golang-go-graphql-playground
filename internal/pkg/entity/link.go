@@ -14,7 +14,7 @@ type Link struct {
 }
 
 func GetAll() []Link {
-	stmt, err := database.Db.Prepare("select id, title, address from link")
+	stmt, err := database.Db.Prepare("select L.id, L.title, L.address, L.UserID, U.Username from link L inner join user U on L.user_id = U.id") // changed
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -25,12 +25,18 @@ func GetAll() []Link {
 	}
 	defer rows.Close()
 	var links []Link
+	var username string
+	var id string
 	for rows.Next() {
 		var link Link
-		err := rows.Scan(&link.ID, &link.Title, &link.Address)
+		err := rows.Scan(&link.ID, &link.Title, &link.Address, &id, &username) // changed
 		if err != nil {
 			log.Fatal(err)
 		}
+		link.User = &User{
+			ID:       id,
+			Username: username,
+		} // changed
 		links = append(links, link)
 	}
 	if err = rows.Err(); err != nil {
@@ -41,12 +47,12 @@ func GetAll() []Link {
 
 func (link Link) Save() int64 {
 	//#3
-	stmt, err := database.Db.Prepare("INSERT INTO link (title, address) VALUES(?,?)")
+	stmt, err := database.Db.Prepare("INSERT INTO link (title, address, user_id) VALUES(?,?,?)")
 	if err != nil {
 		log.Fatal(err)
 	}
 	//#4
-	res, err := stmt.Exec(link.Title, link.Address)
+	res, err := stmt.Exec(link.Title, link.Address, link.User.ID)
 	if err != nil {
 		log.Fatal(err)
 	}
