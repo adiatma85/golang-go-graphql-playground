@@ -7,22 +7,24 @@ package graph
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/adiatma85/exp-golang-graphql/graph/model"
+	"github.com/adiatma85/exp-golang-graphql/internal/pkg/entity"
 )
 
 // Goalnya nanti adalah membuat sebuah domain layer yang digunakan untuk fetching dari resovler schema
 
 // CreateLink is the resolver for the createLink field.
 func (r *mutationResolver) CreateLink(ctx context.Context, input model.NewLink) (*model.Link, error) {
-	var link model.Link
-	var user model.User
-	link.Address = input.Address
+	var link entity.Link
 	link.Title = input.Title
-	user.ID = "Ini string yang panjang dan lebar"
-	user.Name = "test"
-	link.User = &user
-	return &link, nil
+	link.Address = input.Address
+
+	fmt.Println("Input adalah: ", input)
+
+	linkID := link.Save()
+	return &model.Link{ID: strconv.FormatInt(linkID, 10), Title: link.Title, Address: link.Address}, nil
 }
 
 // CreateUser is the resolver for the createUser field.
@@ -42,14 +44,15 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, input model.Refresh
 
 // Links is the resolver for the links field.
 func (r *queryResolver) Links(ctx context.Context) ([]*model.Link, error) {
-	var links []*model.Link
-	dummyLink := model.Link{
-		Title:   "our dummy link",
-		Address: "https://address.org",
-		User:    &model.User{Name: "admin"},
+	var (
+		resultLinks []*model.Link
+	)
+
+	dbLinks := entity.GetAll()
+	for _, link := range dbLinks {
+		resultLinks = append(resultLinks, &model.Link{ID: link.ID, Title: link.Title, Address: link.Address})
 	}
-	links = append(links, &dummyLink)
-	return links, nil
+	return resultLinks, nil
 }
 
 // Mutation returns MutationResolver implementation.
