@@ -7,38 +7,98 @@ package graph
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/adiatma85/exp-golang-graphql/graph/model"
+	"github.com/adiatma85/exp-golang-graphql/internal/pkg/auth"
+	"github.com/adiatma85/exp-golang-graphql/internal/pkg/entity"
+	"github.com/adiatma85/exp-golang-graphql/internal/pkg/jwt"
 )
+
+// Goalnya nanti adalah membuat sebuah domain layer yang digunakan untuk fetching dari resovler schema
 
 // CreateLink is the resolver for the createLink field.
 func (r *mutationResolver) CreateLink(ctx context.Context, input model.NewLink) (*model.Link, error) {
-	panic(fmt.Errorf("not implemented: CreateLink - createLink"))
+	var link entity.Link
+	link.Title = input.Title
+	link.Address = input.Address
+	user := auth.ForContext(ctx)
+	if user == nil {
+		return &model.Link{}, fmt.Errorf("access denied")
+	}
+
+	link.User = user
+	linkID := link.Save()
+	graphqlUser := &model.User{
+		ID:   user.ID,
+		Name: user.Username,
+	}
+
+	return &model.Link{ID: strconv.FormatInt(linkID, 10), Title: link.Title, Address: link.Address, User: graphqlUser}, nil
 }
 
 // CreateUser is the resolver for the createUser field.
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) (string, error) {
-	panic(fmt.Errorf("not implemented: CreateUser - createUser"))
+	var (
+		user entity.User
+	)
+	user.Username = input.Username
+	user.Password = input.Password
+	user.Create()
+	token, err := jwt.GenerateToken(user.Username)
+	if err != nil {
+		return "", err
+	}
+	return token, nil
 }
 
 // Login is the resolver for the login field.
 func (r *mutationResolver) Login(ctx context.Context, input model.Login) (string, error) {
-	panic(fmt.Errorf("not implemented: Login - login"))
+	var (
+		user entity.User
+	)
+	user.Username = input.Username
+	user.Password = input.Password
+	correct := user.Authenticate()
+	if !correct {
+		// 1
+		return "", &entity.WrongUsernameOrPasswordError{}
+	}
+	token, err := jwt.GenerateToken(user.Username)
+	if err != nil {
+		return "", err
+	}
+	return token, nil
 }
 
 // RefreshToken is the resolver for the refreshToken field.
 func (r *mutationResolver) RefreshToken(ctx context.Context, input model.RefreshTokenInput) (string, error) {
-	panic(fmt.Errorf("not implemented: RefreshToken - refreshToken"))
-}
-
-// CreateJancok is the resolver for the createJancok field.
-func (r *mutationResolver) CreateJancok(ctx context.Context, input model.NewJancok) (*model.Jancok, error) {
-	panic(fmt.Errorf("not implemented: CreateJancok - createJancok"))
+	username, err := jwt.ParseToken(input.Token)
+	if err != nil {
+		return "", fmt.Errorf("access denied")
+	}
+	token, err := jwt.GenerateToken(username)
+	if err != nil {
+		return "", err
+	}
+	return token, nil
 }
 
 // Links is the resolver for the links field.
 func (r *queryResolver) Links(ctx context.Context) ([]*model.Link, error) {
-	panic(fmt.Errorf("not implemented: Links - links"))
+	var (
+		resultLinks []*model.Link
+	)
+
+	dbLinks := entity.GetAll()
+	for _, link := range dbLinks {
+		graphqlUser := &model.User{
+			ID:   link.User.ID,
+			Name: link.User.Username,
+		}
+		resultLinks = append(resultLinks, &model.Link{ID: link.ID, Title: link.Title, Address: link.Address, User: graphqlUser})
+	}
+	return resultLinks, nil
 }
 
 // Mutation returns MutationResolver implementation.
