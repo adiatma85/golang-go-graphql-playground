@@ -19,6 +19,6 @@ services:
       - "./storage/mysql/scripts:/docker-entrypoint-initdb.d"
       - "./storage/mysql/data:/var/lib/mysql"
     environment:
-      MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: golang-graphql
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: gql_blogs
       MYSQL_TCP_PORT: 3306
