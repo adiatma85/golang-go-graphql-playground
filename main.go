@@ -15,7 +15,22 @@ import (
 
 const defaultPort = "8080"
 
+const (
+	configfile   string = "./etc/cfg/conf.json"
+	templatefile string = "./etc/tpl/conf.template.json"
+)
+
 func main() {
+	// Build the config
+	// Assume the config is exist in the first place
+
+	// Read the Config first
+	cfg := config.Init()
+	configreader := configreader.Init(configreader.Options{
+		ConfigFile: configfile,
+	})
+	configreader.ReadConfig(&cfg)
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = defaultPort
@@ -42,6 +57,6 @@ func main() {
 	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	router.Handle("/query", server)
 
-	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
+	log.Printf("connect to http://localhost:%s/ for GraphQL playground", config)
 	log.Fatal(http.ListenAndServe(":"+port, router))
 }
