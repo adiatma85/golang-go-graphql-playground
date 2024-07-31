@@ -1,16 +1,17 @@
 package main
 
 import (
-	"log"
-	"net/http"
-	"os"
+	"fmt"
 
-	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/adiatma85/exp-golang-graphql/graph"
-	"github.com/adiatma85/exp-golang-graphql/internal/pkg/auth"
-	"github.com/adiatma85/exp-golang-graphql/internal/pkg/db/mysql"
-	"github.com/go-chi/chi"
+	"github.com/adiatma85/exp-golang-graphql/src/business/domain"
+	"github.com/adiatma85/exp-golang-graphql/src/business/usecase"
+	"github.com/adiatma85/exp-golang-graphql/utils/config"
+	"github.com/adiatma85/own-go-sdk/configreader"
+	"github.com/adiatma85/own-go-sdk/instrument"
+	"github.com/adiatma85/own-go-sdk/jwtAuth"
+	"github.com/adiatma85/own-go-sdk/log"
+	"github.com/adiatma85/own-go-sdk/parser"
+	"github.com/adiatma85/own-go-sdk/sql"
 )
 
 const defaultPort = "8080"
@@ -21,6 +22,26 @@ const (
 )
 
 func main() {
+	// KODINGAN YANG LAMA
+
+	// // Using chi router
+	// router := chi.NewRouter()
+
+	// // Kalau kaya gini berarti semua router kenak dong??
+	// // Jawaban iya, dia kenak semuanya
+	// router.Use(auth.Middleware())
+
+	// mysql.InitDB()
+	// defer mysql.CloseDB()
+	// server := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
+	// router.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	// router.Handle("/query", server)
+
+	// log.Printf("connect to http://localhost:%s/ for GraphQL playground", cfg.Gin.Port)
+	// log.Fatal(http.ListenAndServe(":"+cfg.Gin.Port, router))
+
+	// KODINGAN YANG LAMA
+
 	// Build the config
 	// Assume the config is exist in the first place
 
@@ -31,32 +52,27 @@ func main() {
 	})
 	configreader.ReadConfig(&cfg)
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = defaultPort
-	}
+	// init logger
+	log := log.Init(cfg.Log)
 
-	// srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
+	// init the instrument
+	instr := instrument.Init(cfg.Instrument)
 
-	// http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	// http.Handle("/query", srv)
+	// Init the DB
+	db := sql.Init(cfg.SQL, log, instr)
 
-	// log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	// log.Fatal(http.ListenAndServe(":"+port, nil))
+	// init the parser
+	parsers := parser.InitParser(log, cfg.Parser)
 
-	// Using chi router
-	router := chi.NewRouter()
+	// Init the jwt
+	jwt := jwtAuth.Init(cfg.JwtAuth)
 
-	// Kalau kaya gini berarti semua router kenak dong??
-	// Jawaban iya, dia kenak semuanya
-	router.Use(auth.Middleware())
+	// Init the domain
+	d := domain.Init(domain.InitParam{Log: log, Db: db, Json: parsers.JSONParser()})
 
-	mysql.InitDB()
-	defer mysql.CloseDB()
-	server := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
-	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	router.Handle("/query", server)
+	// Init the usecase
+	uc := usecase.Init(usecase.InitParam{Log: log, Dom: d, JwtAuth: jwt})
 
-	log.Printf("connect to http://localhost:%s/ for GraphQL playground", config)
-	log.Fatal(http.ListenAndServe(":"+port, router))
+	// Init the GIN
+	fmt.Println("uc adalah: ", uc)
 }
