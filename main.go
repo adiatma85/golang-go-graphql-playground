@@ -15,8 +15,6 @@ import (
 	"github.com/adiatma85/own-go-sdk/sql"
 )
 
-// const defaultPort = "8080"
-
 const (
 	configfile   string = "./etc/cfg/conf.json"
 	templatefile string = "./etc/tpl/conf.template.json"
