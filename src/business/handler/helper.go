@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/adiatma85/exp-golang-graphql/src/business/entity"
 	"github.com/adiatma85/own-go-sdk/appcontext"
 	"github.com/adiatma85/own-go-sdk/codes"
@@ -20,6 +22,39 @@ func (r *rest) Ping(ctx *gin.Context) {
 		Version: r.conf.Meta.Version,
 	}
 	r.httpRespSuccess(ctx, codes.CodeSuccess, resp, nil)
+}
+
+// Graphql Handler
+func (r *rest) graphqlHandler() gin.HandlerFunc {
+	h := handler.NewDefaultServer(r.graphql)
+
+	return func(c *gin.Context) {
+		h.ServeHTTP(c.Writer, c.Request)
+	}
+}
+
+// Playground Handler
+func (r *rest) playgroundHandler() gin.HandlerFunc {
+	h := playground.Handler("GraphQL", "/query")
+
+	return func(c *gin.Context) {
+		h.ServeHTTP(c.Writer, c.Request)
+	}
+}
+
+func (r *rest) SetTimeout(ctx *gin.Context) {
+	// wrap the request context with a timeout
+	c, cancel := context.WithTimeout(ctx.Request.Context(), r.conf.Timeout)
+
+	// cancel to clear resources after finished
+	defer cancel()
+
+	c = appcontext.SetRequestStartTime(c, time.Now())
+
+	// replace request with context wrapped request
+	ctx.Request = ctx.Request.WithContext(c)
+	ctx.Next()
+
 }
 
 func (r *rest) httpRespSuccess(ctx *gin.Context, code codes.Code, data interface{}, p *entity.Pagination) {

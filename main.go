@@ -1,9 +1,10 @@
 package main
 
 import (
-	"fmt"
-
+	// graph_handler "github.com/99designs/gqlgen/graphql/handler"
+	"github.com/adiatma85/exp-golang-graphql/graph"
 	"github.com/adiatma85/exp-golang-graphql/src/business/domain"
+	"github.com/adiatma85/exp-golang-graphql/src/business/handler"
 	"github.com/adiatma85/exp-golang-graphql/src/business/usecase"
 	"github.com/adiatma85/exp-golang-graphql/utils/config"
 	"github.com/adiatma85/own-go-sdk/configreader"
@@ -14,7 +15,7 @@ import (
 	"github.com/adiatma85/own-go-sdk/sql"
 )
 
-const defaultPort = "8080"
+// const defaultPort = "8080"
 
 const (
 	configfile   string = "./etc/cfg/conf.json"
@@ -73,6 +74,11 @@ func main() {
 	// Init the usecase
 	uc := usecase.Init(usecase.InitParam{Log: log, Dom: d, JwtAuth: jwt})
 
+	// Initialize the Graphql in here
+	graphql := graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{Uc: uc, Log: log}})
+
 	// Init the GIN
-	fmt.Println("uc adalah: ", uc)
+	rest := handler.Init(handler.InitParam{Conf: cfg.Gin, Json: parsers.JSONParser(), Log: log, Uc: uc, Instrument: instr, JwtAuth: jwt, Graphql: graphql})
+
+	rest.Run()
 }
