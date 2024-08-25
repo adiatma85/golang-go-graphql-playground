@@ -1,6 +1,6 @@
 # Kita mikirin login dulu gimana deh
 input Login {
-  username: String!
+  email: String!
   password: String!
 }
 

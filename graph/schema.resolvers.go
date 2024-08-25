@@ -6,14 +6,23 @@ package graph
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/adiatma85/exp-golang-graphql/graph/model"
+	"github.com/adiatma85/exp-golang-graphql/src/business/entity"
 )
 
 // Login is the resolver for the login field.
 func (r *mutationResolver) Login(ctx context.Context, input model.Login) (string, error) {
-	panic(fmt.Errorf("not implemented: Login - login"))
+	userLoginReq := entity.UserLoginRequest{
+		Email:    input.Email,
+		Password: input.Password,
+	}
+	userJwt, err := r.Uc.User.SignInWithPassword(ctx, userLoginReq)
+	if err != nil {
+		return "", err
+	}
+
+	return userJwt.AccessToken, nil
 }
 
 // Mutation returns MutationResolver implementation.
