@@ -1,0 +1,10 @@
+# Kita mikirin login dulu gimana deh
+input Login {
+  username: String!
+  password: String!
+}
+
+type Mutation {
+    # Login seharusnya returning sebuah object, but for now kita returning string dulu
+    login(input: Login!): String!
+}
