@@ -1,0 +1,4 @@
+type Mutation {
+  login(input: Login!): UserLoginResponse!
+  register(input: CreateUserParam!): User!
+}

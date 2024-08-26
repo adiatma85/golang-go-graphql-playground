@@ -2,6 +2,14 @@
 
 package model
 
+type CreateUserParam struct {
+	Email           string `json:"email"`
+	Username        string `json:"username"`
+	Password        string `json:"password"`
+	ConfirmPassword string `json:"confirmPassword"`
+	DisplayName     string `json:"displayName"`
+}
+
 type Login struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
@@ -11,4 +19,19 @@ type Mutation struct {
 }
 
 type Query struct {
+}
+
+type User struct {
+	ID          int    `json:"id"`
+	Roleid      int    `json:"roleid"`
+	Email       string `json:"email"`
+	Username    string `json:"username"`
+	Displayname string `json:"displayname"`
+}
+
+type UserLoginResponse struct {
+	Email        string `json:"email"`
+	DisplayName  string `json:"displayName"`
+	AccessToken  string `json:"accessToken"`
+	RefreshToken string `json:"refreshToken"`
 }
