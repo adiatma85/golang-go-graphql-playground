@@ -1,0 +1,12 @@
+input Login {
+  email: String!
+  password: String!
+}
+
+input CreateUserParam {
+  email: String!
+  username: String!
+  password: String!
+  confirmPassword: String!
+  displayName: String!
+}

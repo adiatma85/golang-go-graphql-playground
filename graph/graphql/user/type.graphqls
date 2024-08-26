@@ -1,0 +1,14 @@
+type UserLoginResponse {
+  email: String!
+  displayName: String!
+  accessToken: String!
+  refreshToken: String!
+}
+
+type User {
+  id: Int!
+  roleid: Int!
+  email: String!
+  username: String!
+  displayname: String!
+}
