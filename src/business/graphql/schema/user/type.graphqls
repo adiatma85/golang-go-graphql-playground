@@ -1,11 +1,11 @@
-type UserLoginResponse {
+type QlUserLoginResponse {
   email: String!
   displayName: String!
   accessToken: String!
   refreshToken: String!
 }
 
-type User {
+type QlUser {
   id: Int!
   roleid: Int!
   email: String!

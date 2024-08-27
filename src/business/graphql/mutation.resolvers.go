@@ -1,4 +1,4 @@
-package graph
+package graphql
 
 // This file will be automatically regenerated based on the schema, any resolver implementations
 // will be copied through when generating and any unknown code will be moved to the end.
@@ -7,31 +7,21 @@ package graph
 import (
 	"context"
 
-	"github.com/adiatma85/exp-golang-graphql/graph/model"
 	"github.com/adiatma85/exp-golang-graphql/src/business/entity"
 )
 
 // Login is the resolver for the login field.
-func (r *mutationResolver) Login(ctx context.Context, input model.Login) (*model.UserLoginResponse, error) {
-	userLoginReq := entity.UserLoginRequest{
-		Email:    input.Email,
-		Password: input.Password,
-	}
-	userJwt, err := r.Uc.User.SignInWithPassword(ctx, userLoginReq)
+func (r *mutationResolver) Login(ctx context.Context, input entity.QlLogin) (entity.QlUserLoginResponse, error) {
+	userJwt, err := r.Uc.User.SignInWithPassword(ctx, entity.UserLoginRequest(input))
 	if err != nil {
-		return nil, err
+		return entity.QlUserLoginResponse(userJwt), err
 	}
 
-	return &model.UserLoginResponse{
-		Email:        userJwt.Email,
-		DisplayName:  userJwt.DisplayName,
-		AccessToken:  userJwt.AccessToken,
-		RefreshToken: userJwt.RefreshToken,
-	}, nil
+	return entity.QlUserLoginResponse(userJwt), nil
 }
 
 // Register is the resolver for the register field.
-func (r *mutationResolver) Register(ctx context.Context, input model.CreateUserParam) (*model.User, error) {
+func (r *mutationResolver) Register(ctx context.Context, input entity.QlCreateUserParam) (entity.QlUser, error) {
 	userRegisterReq := entity.CreateUserParam{
 		Email:           input.Email,
 		Username:        input.Username,
@@ -42,14 +32,14 @@ func (r *mutationResolver) Register(ctx context.Context, input model.CreateUserP
 
 	user, err := r.Uc.User.CreateWithoutAuthInfo(ctx, userRegisterReq)
 	if err != nil {
-		return nil, err
+		return entity.QlUser{}, err
 	}
 
-	return &model.User{
+	return entity.QlUser{
 		ID:          int(user.ID),
 		Roleid:      int(user.RoleId.Int64),
 		Email:       user.Email,
-		Username:    user.Username,
+		Username:    input.Username,
 		Displayname: user.DisplayName,
 	}, nil
 }

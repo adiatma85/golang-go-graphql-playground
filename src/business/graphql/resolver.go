@@ -1,5 +1,4 @@
-//go:generate go run github.com/99designs/gqlgen generate
-package graph
+package graphql
 
 import (
 	"github.com/adiatma85/exp-golang-graphql/src/business/usecase"
