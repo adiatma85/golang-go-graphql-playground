@@ -1,9 +1,9 @@
-input Login {
+input QlLogin {
   email: String!
   password: String!
 }
 
-input CreateUserParam {
+input QlCreateUserParam {
   email: String!
   username: String!
   password: String!

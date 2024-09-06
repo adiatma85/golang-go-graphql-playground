@@ -1,0 +1,4 @@
+type Mutation {
+  login(input: QlLogin!): QlUserLoginResponse!
+  register(input: QlCreateUserParam!): QlUser!
+}

@@ -2,8 +2,9 @@ package main
 
 import (
 	// graph_handler "github.com/99designs/gqlgen/graphql/handler"
-	"github.com/adiatma85/exp-golang-graphql/graph"
+
 	"github.com/adiatma85/exp-golang-graphql/src/business/domain"
+	"github.com/adiatma85/exp-golang-graphql/src/business/graphql"
 	"github.com/adiatma85/exp-golang-graphql/src/business/handler"
 	"github.com/adiatma85/exp-golang-graphql/src/business/usecase"
 	"github.com/adiatma85/exp-golang-graphql/utils/config"
@@ -50,7 +51,7 @@ func main() {
 	uc := usecase.Init(usecase.InitParam{Log: log, Dom: d, JwtAuth: jwt})
 
 	// Initialize the Graphql in here
-	graphql := graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{Uc: uc, Log: log}})
+	graphql := graphql.NewExecutableSchema(graphql.Config{Resolvers: &graphql.Resolver{Uc: uc, Log: log}})
 
 	// Init the GIN
 	rest := handler.Init(handler.InitParam{Conf: cfg.Gin, Json: parsers.JSONParser(), Log: log, Uc: uc, Instrument: instr, JwtAuth: jwt, Graphql: graphql})
